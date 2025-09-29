@@ -24,11 +24,8 @@ def plot_main(model_data, case_data, mobility_data, vax_data):
     y_vals_transmission = model_data["transmission potential"][0.05].to_list() + model_data["transmission potential"][0.95][::-1].to_list()
     
     # Define elements for mobility plot
-    mobility_index = mobility_data.index
-    mobility_est = ['transit_stations_percent_change_from_baseline', 'workplaces_percent_change_from_baseline', 'residential_percent_change_from_baseline']
     
     # Define elements for vax plot
-    vax_index = vax_data.index
     vax_est = vax_data['people_fully_vaccinated_per_hundred']
                                  
     # Create subplot
@@ -63,32 +60,25 @@ def plot_main(model_data, case_data, mobility_data, vax_data):
                              fill='toself', showlegend=False ), row=2, col=2)
     
     # Add mobility figure
-    fig.add_trace(go.Scatter(x=mobility_data.index, y=mobility_data['transit_stations_percent_change_from_baseline'], 
-                             mode="lines", name="Mobility", line=dict(color='black', dash='dot')), row=3, col=1)
-    fig.add_trace(go.Scatter(x=mobility_data.index, y=mobility_data['workplaces_percent_change_from_baseline'], 
-                             mode="lines", name="Mobility", line=dict(color='black', dash='dash')), row=3, col=1)
-    fig.add_trace(go.Scatter(x=mobility_data.index, y=mobility_data['residential_percent_change_from_baseline'], 
-                             mode="lines", name="Mobility", line=dict(color='black')), row=3, col=1)
-    # add annotation
-    annotat_date = pd.date_range(start="2022-01-01",end="2022-03-01")
-    fig.add_trace(go.Scatter(x=annotat_date, y=[i-i-55 for i in range(len(annotat_date))], 
-                             mode="lines", line=dict(color='black', dash='dot')), row=3, col=1)
-    fig.add_trace(go.Scatter(x=[datetime(2022, 3, 20)], y=[-55], 
-                             mode="text", text=['Transit'], line=dict(color='black', dash='dot')), row=3, col=1)
-    
-    fig.add_trace(go.Scatter(x=annotat_date, y=[i-i-65 for i in range(len(annotat_date))], 
-                             mode="lines", text=['Workplaces'], line=dict(color='black', dash='dash')), row=3, col=1)
-    fig.add_trace(go.Scatter(x=[datetime(2022, 4, 1)], y=[-65], 
-                             mode="text", text=['Workplaces'], line=dict(color='black', dash='dot')), row=3, col=1)
-    
-    fig.add_trace(go.Scatter(x=annotat_date, y=[i-i-75 for i in range(len(annotat_date))], 
-                             mode="lines", text=['Residential'], line=dict(color='black')), row=3, col=1)
-    fig.add_trace(go.Scatter(x=[datetime(2022, 4, 1)], y=[-75], 
-                             mode="text", text=['Residential'], line=dict(color='black', dash='dot')), row=3, col=1)
-    
+    mob_colour_map = {
+        "transit_stations": "grey",
+        "workplaces": "red",
+        "residential": "brown",
+    }
+    for mob_type in mob_colour_map:
+        fig.add_trace(
+            go.Scatter(
+                x=mobility_data.index, 
+                y=mobility_data[f'{mob_type}_percent_change_from_baseline'],
+                name=mob_type,
+                line=dict(color=mob_colour_map[mob_type], width=3.0),
+            ), 
+            row=3, 
+            col=1,
+        )
+
     # Add vaccination figure
     fig.add_trace(go.Scatter(x=vax_data.index, y=vax_est, mode="lines", name="Vaccination", line={"color": 'black'}), row=3, col=2)
-    
                                  
     return fig.update_layout(height=1000, width=1200)                            
 
